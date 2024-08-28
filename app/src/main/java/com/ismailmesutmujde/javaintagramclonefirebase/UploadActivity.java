@@ -25,12 +25,16 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.ismailmesutmujde.javaintagramclonefirebase.databinding.ActivityUploadBinding;
 
+import java.util.HashMap;
 import java.util.UUID;
 
 public class UploadActivity extends AppCompatActivity {
@@ -54,6 +58,8 @@ public class UploadActivity extends AppCompatActivity {
         View uploadView = uploadBinding.getRoot();
         setContentView(uploadView);
 
+        registerLauncher();
+
         firebaseStorage = FirebaseStorage.getInstance();
         auth = FirebaseAuth.getInstance();
         firebaseFirestore = FirebaseFirestore.getInstance();
@@ -73,6 +79,37 @@ public class UploadActivity extends AppCompatActivity {
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
                     // Download url
+                    StorageReference newReference = firebaseStorage.getReference(imageName);
+                    newReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                        @Override
+                        public void onSuccess(Uri uri) {
+                            String downloadUrl = uri.toString();
+                            String comment = uploadBinding.commentText.getText().toString();
+                            FirebaseUser user = auth.getCurrentUser();
+                            String email = user.getEmail();
+
+                            HashMap<String, Object> postData = new HashMap<>();
+                            postData.put("useremail", email);
+                            postData.put("downloadurl", downloadUrl);
+                            postData.put("comment", comment);
+                            postData.put("date", FieldValue.serverTimestamp());
+
+                            firebaseFirestore.collection("Posts").add(postData).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                @Override
+                                public void onSuccess(DocumentReference documentReference) {
+                                    Intent intent = new Intent(UploadActivity.this, FeedActivity.class);
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                    startActivity(intent);
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Toast.makeText(UploadActivity.this, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                                }
+                            });
+
+                        }
+                    });
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
@@ -105,14 +142,14 @@ public class UploadActivity extends AppCompatActivity {
         }
     }
 
-    private void RegisterLauncher() {
+    private void registerLauncher() {
         activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
             @Override
             public void onActivityResult(ActivityResult result) {
                 if (result.getResultCode() == RESULT_OK) {
-                    Intent intentResult = result.getData();
-                    if(intentResult != null) {
-                        imageData = intentResult.getData();
+                    Intent intentFromResult = result.getData();
+                    if(intentFromResult != null) {
+                        imageData = intentFromResult.getData();
                         uploadBinding.selectImage.setImageURI(imageData);
 
 
