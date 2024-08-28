@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "867975837258",
+    "project_id": "javainstagramapp",
+    "storage_bucket": "javainstagramapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:867975837258:android:5392a3722361d3063758b3",
+        "android_client_info": {
+          "package_name": "com.ismailmesutmujde.javaintagramclonefirebase"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAc-RZOGUYYowPzKehkIgF739YJWhBNWfs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
