@@ -16,15 +16,29 @@ import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.ismailmesutmujde.javaintagramclonefirebase.databinding.ActivityUploadBinding;
+
+import java.util.UUID;
 
 public class UploadActivity extends AppCompatActivity {
 
+    private FirebaseStorage firebaseStorage;
+    private FirebaseAuth auth;
+    private FirebaseFirestore firebaseFirestore;
+    private StorageReference storageReference ;
     Uri imageData;
     private ActivityUploadBinding uploadBinding;
     ActivityResultLauncher<Intent> activityResultLauncher;
@@ -40,10 +54,33 @@ public class UploadActivity extends AppCompatActivity {
         View uploadView = uploadBinding.getRoot();
         setContentView(uploadView);
 
-
+        firebaseStorage = FirebaseStorage.getInstance();
+        auth = FirebaseAuth.getInstance();
+        firebaseFirestore = FirebaseFirestore.getInstance();
+        storageReference = firebaseStorage.getReference();
     }
 
     public void uploadButtonClicked(View view) {
+
+        if (imageData != null) {
+
+            // uuid : universal unique id
+            UUID uuid = UUID.randomUUID();
+            String imageName = "/images/" + uuid + ".jpg";
+
+            storageReference.child(imageName).putFile(imageData).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
+                    // Download url
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Toast.makeText(UploadActivity.this, e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                }
+            });
+        }
 
     }
 
@@ -78,7 +115,7 @@ public class UploadActivity extends AppCompatActivity {
                         imageData = intentResult.getData();
                         uploadBinding.selectImage.setImageURI(imageData);
 
-                        /*
+
                         try {
                             if (Build.VERSION.SDK_INT >= 28) {
                                 ImageDecoder.Source source = ImageDecoder.createSource(UploadActivity.this.getContentResolver(), imageData);
@@ -90,7 +127,7 @@ public class UploadActivity extends AppCompatActivity {
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
-                        }*/
+                        }
                     }
                 }
             }
