@@ -1,4 +1,4 @@
-package com.ismailmesutmujde.javaintagramclonefirebase;
+package com.ismailmesutmujde.javaintagramclonefirebase.view;
 
 import android.Manifest;
 import android.content.Intent;

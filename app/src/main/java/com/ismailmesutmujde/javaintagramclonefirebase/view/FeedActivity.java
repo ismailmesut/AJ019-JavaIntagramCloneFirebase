@@ -1,4 +1,4 @@
-package com.ismailmesutmujde.javaintagramclonefirebase;
+package com.ismailmesutmujde.javaintagramclonefirebase.view;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,15 +13,16 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.ismailmesutmujde.javaintagramclonefirebase.R;
 import com.ismailmesutmujde.javaintagramclonefirebase.databinding.ActivityFeedBinding;
+import com.ismailmesutmujde.javaintagramclonefirebase.model.Post;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 
@@ -31,12 +32,17 @@ public class FeedActivity extends AppCompatActivity {
     private FirebaseAuth auth;
     private FirebaseFirestore firebaseFirestore;
 
+    ArrayList<Post> postArrayList;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         feedBinding = ActivityFeedBinding.inflate(getLayoutInflater());
         View feedView = feedBinding.getRoot();
         setContentView(feedView);
+
+        postArrayList = new ArrayList<>();
 
         auth = FirebaseAuth.getInstance();
         firebaseFirestore = FirebaseFirestore.getInstance();
@@ -45,7 +51,6 @@ public class FeedActivity extends AppCompatActivity {
     }
 
     private void getData() {
-
         //DocumentReference documentReference = firebaseFirestore.collection("Posts").document("fkdsf");
         //CollectionReference collectionReference = firebaseFirestore.collection("Posts");
         firebaseFirestore.collection("Posts").addSnapshotListener(new EventListener<QuerySnapshot>() {
@@ -57,11 +62,14 @@ public class FeedActivity extends AppCompatActivity {
                 if (value != null) {
                     for (DocumentSnapshot snapshot : value.getDocuments()) {
                         Map<String, Object> data = snapshot.getData();
+
+                        // Casting
                         String userEmail = (String) data.get("useremail");
                         String comment = (String) data.get("comment");
                         String downloadUrl = (String) data.get("downloadUrl");
 
-                        System.out.println(comment);
+                        Post post = new Post(userEmail, comment, downloadUrl);
+                        postArrayList.add(post);
                     }
                 }
             }
