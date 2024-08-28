@@ -6,18 +6,30 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.ismailmesutmujde.javaintagramclonefirebase.databinding.ActivityFeedBinding;
+
+import java.util.Map;
 
 
 public class FeedActivity extends AppCompatActivity {
 
     private ActivityFeedBinding feedBinding;
     private FirebaseAuth auth;
+    private FirebaseFirestore firebaseFirestore;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +39,33 @@ public class FeedActivity extends AppCompatActivity {
         setContentView(feedView);
 
         auth = FirebaseAuth.getInstance();
+        firebaseFirestore = FirebaseFirestore.getInstance();
+
+        getData();
+    }
+
+    private void getData() {
+
+        //DocumentReference documentReference = firebaseFirestore.collection("Posts").document("fkdsf");
+        //CollectionReference collectionReference = firebaseFirestore.collection("Posts");
+        firebaseFirestore.collection("Posts").addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                if (error != null) {
+                    Toast.makeText(FeedActivity.this, error.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                }
+                if (value != null) {
+                    for (DocumentSnapshot snapshot : value.getDocuments()) {
+                        Map<String, Object> data = snapshot.getData();
+                        String userEmail = (String) data.get("useremail");
+                        String comment = (String) data.get("comment");
+                        String downloadUrl = (String) data.get("downloadUrl");
+
+                        System.out.println(comment);
+                    }
+                }
+            }
+        });
     }
 
     @Override
